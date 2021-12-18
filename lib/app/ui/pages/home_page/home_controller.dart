@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart' show ChangeNotifier, ImageConfiguration, Offset;
+import 'package:flutter/widgets.dart' show ChangeNotifier, Offset;
 import 'package:google_maps/app/helpers/image_to_bytes.dart';
 import 'package:google_maps/app/ui/utils/map_styles.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -15,7 +15,7 @@ class HomeController with ChangeNotifier{
   HomeController(){
     imageToBytes('assets/car.png').then((value){
       final bitmap = BitmapDescriptor.fromBytes(value);
-      _iconMap.complete();
+      _iconMap.complete(bitmap);
     });
   }
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps/app/ui/pages/home_page/home_page.dart';
+import 'package:google_maps/app/ui/routes/pages.dart';
+import 'package:google_maps/app/ui/routes/routes.dart';
 
 void main() => runApp(MyApp());
 
@@ -7,9 +9,13 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Material App',
-      home: HomePage()
+      theme: ThemeData(
+        primarySwatch: Colors.blue
+      ),
+      initialRoute: Routes.SPLASH,
+      routes: appRoutes(),
     );
   }
 }
