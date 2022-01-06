@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart' show ChangeNotifier, Offset;
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps/app/helpers/image_to_bytes.dart';
 import 'package:google_maps/app/ui/utils/map_styles.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -12,11 +13,35 @@ class HomeController with ChangeNotifier{
 
   final _iconMap = Completer<BitmapDescriptor>();
 
+  bool _loading = true;
+  bool get loading => _loading;
+
+  late bool _gpsEnabled;
+  bool get gpsEnable => _gpsEnabled;
+
+  StreamSubscription? _gpsSuscription;
+
   HomeController(){
-    imageToBytes('assets/car.png').then((value){
-      final bitmap = BitmapDescriptor.fromBytes(value);
-      _iconMap.complete(bitmap);
-    });
+    _init();
+  }
+
+
+  Future<void> _init() async{
+    final value = await imageToBytes('assets/car.png');
+    final bitmap = BitmapDescriptor.fromBytes(value);
+    _iconMap.complete(bitmap);
+
+    _gpsEnabled = await Geolocator.isLocationServiceEnabled();
+
+    _loading = false;
+
+    _gpsSuscription =  Geolocator.getServiceStatusStream().listen(
+      (status){
+        _gpsEnabled = status == ServiceStatus.enabled;
+        notifyListeners();
+      }
+    );
+    notifyListeners();
   }
 
   Set<Marker> get markers => _markers.values.toSet();
@@ -28,6 +53,8 @@ class HomeController with ChangeNotifier{
   void onMapCreated(GoogleMapController controller){
     controller.setMapStyle(mapStyle);
   }
+
+  Future<void> turnOnGps() => Geolocator.openLocationSettings();
 
   void onTap(LatLng position) async{
     final id = _markers.length.toString();
@@ -43,7 +70,7 @@ class HomeController with ChangeNotifier{
         _markersController.sink.add(id);
       },
       onDragEnd: (newPosition){
-        print(newPosition);
+        //print(newPosition);
       }
     );
     _markers[markerId] = marker;
@@ -53,6 +80,7 @@ class HomeController with ChangeNotifier{
   @override
   void dispose() {
     _markersController.close();
+    _gpsSuscription?.cancel();
     super.dispose();
   }
 }
